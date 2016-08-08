@@ -1,15 +1,15 @@
 'use strict'
 
-import 'webcrypto-shim'
+require('webcrypto-shim')
 
-export class OrbitCrypto {
+class OrbitCrypto {
   static importKeyFromIpfs(ipfs, hash) {
     return ipfs.object.get(hash, { enc: 'base58' })
       .then((obj) => JSON.parse(obj.toJSON().Data))
       .then((key) => OrbitCrypto.importKey(key))
   }
 
-  static exportToIpfs(ipfs, key) {
+  static exportKeyToIpfs(ipfs, key) {
     return OrbitCrypto.exportKey(key)
       .then((k) => JSON.stringify(k, null, 2))
       .then((s) => new Buffer(s))
@@ -64,3 +64,5 @@ export class OrbitCrypto {
     )
   }
 }
+
+module.exports = OrbitCrypto
