@@ -1,6 +1,10 @@
 'use strict'
 
-require('webcrypto-shim')
+var WebCrypto = require("node-webcrypto-ossl").default
+const isNodeJs = !(typeof window !== "undefined" && window !== null)
+var crypto = isNodeJs ? new WebCrypto() : window.crypto
+
+// require('webcrypto-shim')
 
 class OrbitCrypto {
   static importKeyFromIpfs(ipfs, hash) {
@@ -18,10 +22,11 @@ class OrbitCrypto {
   }
 
   static generateKey() {
-    return window.crypto.subtle.generateKey(
+    return crypto.subtle.generateKey(
       {
-          name: "HMAC",
-          hash: { name: "SHA-256" }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+          name: "ECDSA",
+          namedCurve: "P-256",
+          // hash: { name: "SHA-256" }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
           //length: 256, //optional, if you want your key length to differ from the hash function's block length
       },
       true, //whether the key is extractable (i.e. can be used in exportKey)
@@ -30,34 +35,41 @@ class OrbitCrypto {
   }
 
   static exportKey(key) {
-    return window.crypto.subtle.exportKey("jwk", key)
+    return crypto.subtle.exportKey("jwk", key.publicKey)
   }
 
   static importKey(key) {
-    return window.crypto.subtle.importKey(
+    return crypto.subtle.importKey(
       "jwk", //can be "jwk" or "raw"
       key,
       {   //this is the algorithm options
-          name: "HMAC",
-          hash: { name: "SHA-256"} , //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+          name: "ECDSA",
+          namedCurve: "P-256"
+          // hash: { name: "SHA-256"} , //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
           //length: 256, //optional, if you want your key length to differ from the hash function's block length
       },
-      key.ext, //whether the key is extractable (i.e. can be used in exportKey)
+      false, //whether the key is extractable (i.e. can be used in exportKey)
       key.key_ops //can be any combination of "sign" and "verify"
     )
   }
 
   static sign(key, data) {
-    return window.crypto.subtle.sign(
-      { name: "HMAC" },
-      key, //from generateKey or importKey above
+    return crypto.subtle.sign(
+      {
+        name: "ECDSA",
+        hash: { name: "SHA-256" }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+      },
+      key.privateKey, //from generateKey or importKey above
       data //ArrayBuffer of data you want to sign
     )
   }
 
   static verify(signature, key, data) {
-    return window.crypto.subtle.verify(
-      { name: "HMAC" },
+    return crypto.subtle.verify(
+      {
+        name: "ECDSA",
+        hash: { name: "SHA-256" }, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+      },
       key, //from generateKey or importKey above
       signature, //ArrayBuffer of the signature
       data //ArrayBuffer of the data
