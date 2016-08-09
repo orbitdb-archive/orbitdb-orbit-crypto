@@ -9,7 +9,7 @@
   "author": "Haad",
   "license": "MIT",
   "dependencies": {
-    "node-webcrypto-ossl": "^1.0.4",
+    "node-webcrypto-ossl": "https://github.com/haadcode/node-webcrypto-ossl.git",
     "webcrypto-shim": "^0.1.1"
   }
 }
