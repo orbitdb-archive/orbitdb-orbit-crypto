@@ -3,11 +3,18 @@
 var EC = require('elliptic').ec;
 var ec = new EC('secp256k1');
 
-const isNodeJs = !(typeof window !== "undefined" && window !== null)
-const keystore = isNodeJs ? null : localStorage
+let keystore
+
+if (typeof localStorage === "undefined" || localStorage === null) {
+  var LocalStorage = require('node-localstorage').LocalStorage
+  keystore = new LocalStorage('./')
+} else {
+  keystore = localStorage
+}
 
 class OrbitCrypto {
-  static useKeyStore(directory) {
+  static useKeyStore(directory = './') {
+    keystore = new LocalStorage(directory)
   }
 
   static importKeyFromIpfs(ipfs, hash) {
