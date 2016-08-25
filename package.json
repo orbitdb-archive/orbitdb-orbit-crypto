@@ -1,6 +1,6 @@
 {
   "name": "orbit-crypto",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Crypto primitives for Orbit",
   "main": "index.js",
   "scripts": {
