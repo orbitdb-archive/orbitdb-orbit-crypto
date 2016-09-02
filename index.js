@@ -14,7 +14,9 @@ if (typeof localStorage === "undefined" || localStorage === null) {
 
 class OrbitCrypto {
   static useKeyStore(directory = './') {
-    keystore = new LocalStorage(directory)
+    if (typeof localStorage === "undefined" || localStorage === null) {
+      keystore = new LocalStorage(directory)
+    }
   }
 
   static importKeyFromIpfs(ipfs, hash) {
