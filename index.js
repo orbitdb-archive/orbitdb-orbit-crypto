@@ -1,12 +1,14 @@
 'use strict'
 
-var EC = require('elliptic').ec;
-var ec = new EC('secp256k1');
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
+const LRU = require('lru')
 
 let keystore
+const cache = new LRU(100)
 
 if (typeof localStorage === "undefined" || localStorage === null) {
-  var LocalStorage = require('node-localstorage').LocalStorage
+  const LocalStorage = require('node-localstorage').LocalStorage
   keystore = new LocalStorage('./')
 } else {
   keystore = localStorage
@@ -20,17 +22,32 @@ class OrbitCrypto {
   }
 
   static importKeyFromIpfs(ipfs, hash) {
+    const cached = cache.get(hash)
+    if (cached)
+      return Promise.resolve(cached)
+
     return ipfs.object.get(hash, { enc: 'base58' })
       .then((obj) => JSON.parse(obj.toJSON().Data))
-      .then((key) => OrbitCrypto.importPublicKey(key))
+      .then((key) => {
+        cache.set(hash, ec.keyFromPublic(key, 'hex'))
+        return OrbitCrypto.importPublicKey(key)
+      })
   }
 
   static exportKeyToIpfs(ipfs, key) {
+    const k = key.getPublic('hex')
+    const cached = cache.get(k)
+    if (cached)
+      return Promise.resolve(cached)
+
     return OrbitCrypto.exportPublicKey(key)
       .then((k) => JSON.stringify(k, null, 2))
       .then((s) => new Buffer(s))
       .then((buffer) => ipfs.object.put(buffer))
-      .then((res) => res.toJSON().Hash)
+      .then((res) => {
+        cache.set(k, res.toJSON().Hash)
+        return res.toJSON().Hash
+      })
   }
 
   static getKey(id = 'default') {
