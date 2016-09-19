@@ -17,7 +17,10 @@ if (typeof localStorage === "undefined" || localStorage === null) {
 class OrbitCrypto {
   static useKeyStore(directory = './') {
     if (typeof localStorage === "undefined" || localStorage === null) {
+      const LocalStorage = require('node-localstorage').LocalStorage
       keystore = new LocalStorage(directory)
+    } else {
+      keystore = localStorage
     }
   }
 
