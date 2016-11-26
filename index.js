@@ -1,7 +1,7 @@
 'use strict'
 
-const EC = require('elliptic').ec;
-const ec = new EC('secp256k1');
+const EC = require('elliptic').ec
+const ec = new EC('secp256k1')
 const LRU = require('lru')
 
 let keystore
@@ -30,7 +30,7 @@ class OrbitCrypto {
       return Promise.resolve(cached)
 
     return ipfs.object.get(hash, { enc: 'base58' })
-      .then((obj) => JSON.parse(obj.toJSON().Data))
+      .then((obj) => JSON.parse(obj.toJSON().data))
       .then((key) => {
         cache.set(hash, ec.keyFromPublic(key, 'hex'))
         return OrbitCrypto.importPublicKey(key)
@@ -48,8 +48,8 @@ class OrbitCrypto {
       .then((s) => new Buffer(s))
       .then((buffer) => ipfs.object.put(buffer))
       .then((res) => {
-        cache.set(k, res.toJSON().Hash)
-        return res.toJSON().Hash
+        cache.set(k, res.toJSON().multihash)
+        return res.toJSON().multihash
       })
   }
 
