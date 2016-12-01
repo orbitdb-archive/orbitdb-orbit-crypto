@@ -105,7 +105,7 @@ class OrbitCrypto {
   }
 
   static verify(signature, key, data) {
-    Promise.resolve(ec.verify(data, signature, key))
+    return Promise.resolve(ec.verify(data, signature, key))
   }
 }
 
